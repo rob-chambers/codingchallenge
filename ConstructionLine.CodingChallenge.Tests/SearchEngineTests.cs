@@ -8,7 +8,7 @@ namespace ConstructionLine.CodingChallenge.Tests
     public class SearchEngineTests : SearchEngineTestsBase
     {
         [Test]
-        public void Test()
+        public void SingleOptionReturnedCorrectly()
         {
             // Arrange
             var shirts = new List<Shirt>
@@ -24,6 +24,92 @@ namespace ConstructionLine.CodingChallenge.Tests
             {
                 Colors = new List<Color> {Color.Red},
                 Sizes = new List<Size> {Size.Small}
+            };
+
+            // Act
+            var results = searchEngine.Search(searchOptions);
+
+            // Assert
+            AssertResults(results.Shirts, searchOptions);
+            AssertSizeCounts(shirts, searchOptions, results.SizeCounts);
+            AssertColorCounts(shirts, searchOptions, results.ColorCounts);
+        }
+
+        [Test]
+        public void EmptyShirtListReturnedCorrectly()
+        {
+            // Arrange
+            var shirts = new List<Shirt>();
+            var searchEngine = new SearchEngine(shirts);
+
+            var searchOptions = new SearchOptions
+            {
+                Colors = new List<Color> { Color.Red },
+                Sizes = new List<Size> { Size.Small }
+            };
+
+            // Act
+            var results = searchEngine.Search(searchOptions);
+
+            // Assert
+            AssertResults(results.Shirts, searchOptions);
+            AssertSizeCounts(shirts, searchOptions, results.SizeCounts);
+            AssertColorCounts(shirts, searchOptions, results.ColorCounts);
+        }
+
+        [Test]
+        public void MultipleOptionsReturnedCorrectly()
+        {
+            // Arrange
+            var shirts = new List<Shirt>();
+            var searchEngine = new SearchEngine(shirts);
+
+            var searchOptions = new SearchOptions
+            {
+                Colors = new List<Color> { Color.Red, Color.Black },
+                Sizes = new List<Size> { Size.Small, Size.Medium }
+            };
+
+            // Act
+            var results = searchEngine.Search(searchOptions);
+
+            // Assert
+            AssertResults(results.Shirts, searchOptions);
+            AssertSizeCounts(shirts, searchOptions, results.SizeCounts);
+            AssertColorCounts(shirts, searchOptions, results.ColorCounts);
+        }
+
+        [Test]
+        public void WhenNoColorSpecifiedUseAll()
+        {
+            // Arrange
+            var shirts = new List<Shirt>();
+            var searchEngine = new SearchEngine(shirts);
+
+            var searchOptions = new SearchOptions
+            {
+                Sizes = new List<Size> { Size.Small }
+            };
+
+            // Act
+            var results = searchEngine.Search(searchOptions);
+
+            // Assert
+            AssertResults(results.Shirts, searchOptions);
+            AssertSizeCounts(shirts, searchOptions, results.SizeCounts);
+            AssertColorCounts(shirts, searchOptions, results.ColorCounts);
+        }
+
+        [Test]
+        public void WhenNoSizeSpecifiedUseAll()
+        {
+            // Arrange
+            var shirts = new List<Shirt>();
+            var searchEngine = new SearchEngine(shirts);
+
+            var searchOptions = new SearchOptions
+            {
+                Colors = new List<Color> { Color.Red }
             };
 
             // Act

@@ -1,8 +1,8 @@
-﻿using System;
+﻿using ConstructionLine.CodingChallenge.Tests.SampleData;
+using NUnit.Framework;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using ConstructionLine.CodingChallenge.Tests.SampleData;
-using NUnit.Framework;
 
 namespace ConstructionLine.CodingChallenge.Tests
 {
@@ -15,14 +15,12 @@ namespace ConstructionLine.CodingChallenge.Tests
         [SetUp]
         public void Setup()
         {
-            
             var dataBuilder = new SampleDataBuilder(50000);
 
             _shirts = dataBuilder.CreateShirts();
 
             _searchEngine = new SearchEngine(_shirts);
         }
-
 
         [Test]
         public void PerformanceTest()

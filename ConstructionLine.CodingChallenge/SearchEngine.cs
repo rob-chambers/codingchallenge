@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 
 namespace ConstructionLine.CodingChallenge
@@ -11,30 +10,58 @@ namespace ConstructionLine.CodingChallenge
         public SearchEngine(List<Shirt> shirts)
         {
             _shirts = shirts;
-
-            // TODO: data preparation and initialisation of additional data structures to improve performance goes here.
-
         }
-
 
         public SearchResults Search(SearchOptions options)
         {
-            // TODO: search logic goes here.
-            var shirts = new List<Shirt>();
-
-            var sizes = _shirts.Where(x => options.Sizes.Contains(x.Size));
-            foreach (var item in sizes)
+            var selectedSizes = options.Sizes;
+            if (!selectedSizes.Any())
             {
-                if (options.Colors.Contains(item.Color))
-                {
-                    shirts.Add(item);
-                    break;
-                }
+                selectedSizes = Size.All;
             }
 
-            var colors = shirts.Select(x => x.Color).Distinct().Count();
+            var selectedColors = options.Colors;
+            if (!selectedColors.Any())
+            {
+                selectedColors = Color.All;
+            }
 
-            var sizeGroups = shirts.GroupBy(x => x.Size)
+            var shirts = _shirts.Where(x => selectedSizes.Contains(x.Size) &&
+                    selectedColors.Contains(x.Color))
+                    .ToList();
+
+            return new SearchResults(shirts, CalculateSizeCounts(shirts), CalculateColorCounts(selectedSizes, shirts));
+        }
+
+        private List<ColorCount> CalculateColorCounts(List<Size> selectedSizes, List<Shirt> shirts)
+        {
+            var colorGroups = shirts
+                .Where(x => selectedSizes.Contains(x.Size))
+                .GroupBy(x => x.Color)
+                .Select(x => new
+                {
+                    Color = x.Key,
+                    Count = x.Count()
+                });
+
+            var colorCounts = new List<ColorCount>();
+            foreach (var item in colorGroups)
+            {
+                colorCounts.Add(new ColorCount
+                {
+                    Color = item.Color,
+                    Count = item.Count
+                });
+            }
+
+            AddMissingColorCounts(colorCounts, selectedSizes);
+            return colorCounts;
+        }
+
+        private List<SizeCount> CalculateSizeCounts(List<Shirt> shirts)
+        {
+            var sizeGroups = shirts
+                .GroupBy(x => x.Size)
                 .Select(x => new
                 {
                     Size = x.Key,
@@ -52,30 +79,10 @@ namespace ConstructionLine.CodingChallenge
             }
 
             AddMissingSizeCounts(sizeCounts);
-
-            var colorGroups = shirts.GroupBy(x => x.Color)
-                .Select(x => new
-                {
-                    Color = x.Key,
-                    Count = x.Count()
-                });
-
-            var colorCounts = new List<ColorCount>();
-            foreach (var item in colorGroups)
-            {
-                colorCounts.Add(new ColorCount
-                {
-                    Color = item.Color,
-                    Count = item.Count
-                });
-            }
-
-            AddMissingColorCounts(colorCounts);
-
-            return new SearchResults(shirts, sizeCounts, colorCounts);
+            return sizeCounts;
         }
 
-        private static void AddMissingSizeCounts(List<SizeCount> sizeCounts)
+        private void AddMissingSizeCounts(List<SizeCount> sizeCounts)
         {
             var distinctSizes = sizeCounts.Select(x => x.Size).Distinct();
             var remaining = Size.All.Except(distinctSizes);
@@ -90,7 +97,7 @@ namespace ConstructionLine.CodingChallenge
             }
         }
 
-        private static void AddMissingColorCounts(List<ColorCount> colorCounts)
+        private void AddMissingColorCounts(List<ColorCount> colorCounts, List<Size> selectedSizes)
         {
             var distinctColors = colorCounts.Select(x => x.Color).Distinct();
             var remaining = Color.All.Except(distinctColors);
@@ -100,7 +107,7 @@ namespace ConstructionLine.CodingChallenge
                 colorCounts.Add(new ColorCount
                 {
                     Color = item,
-                    Count = 0
+                    Count = _shirts.Count(x => x.Color == item && selectedSizes.Contains(x.Size))
                 });
             }
         }
