@@ -10,6 +10,7 @@ namespace ConstructionLine.CodingChallenge.Tests
         [Test]
         public void Test()
         {
+            // Arrange
             var shirts = new List<Shirt>
             {
                 new Shirt(Guid.NewGuid(), "Red - Small", Size.Small, Color.Red),
@@ -25,8 +26,10 @@ namespace ConstructionLine.CodingChallenge.Tests
                 Sizes = new List<Size> {Size.Small}
             };
 
+            // Act
             var results = searchEngine.Search(searchOptions);
 
+            // Assert
             AssertResults(results.Shirts, searchOptions);
             AssertSizeCounts(shirts, searchOptions, results.SizeCounts);
             AssertColorCounts(shirts, searchOptions, results.ColorCounts);
